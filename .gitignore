@@ -1,0 +1,13 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+staticfiles/
+db.sqlite3
+.vercel/
+.DS_Store
+.idea/
+.vscode/
+.env.local
+*.zip

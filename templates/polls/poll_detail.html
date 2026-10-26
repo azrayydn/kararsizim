@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load polls_extras %}
+
+{% block title %}{{ poll.question }} · kararsızım{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'polls:home' %}">← Tüm anketler</a>
+
+<article class="card poll-detail">
+  {% if poll.is_urgent %}
+    {% if closed_urgent %}
+      <p class="urgent-bar urgent-bar--closed">🔒 Oylama kapandı, sonuç kilitlendi</p>
+    {% else %}
+      <p class="urgent-bar" role="timer">⏱ Acil Karar
+        <span class="urgent-bar__time" data-countdown data-seconds-left="{{ seconds_left }}" data-reload="{{ poll.pk }}" data-end-text="Süre doldu">{{ clock }}</span>
+      </p>
+    {% endif %}
+  {% endif %}
+
+  {% if poll.has_image %}
+    <a class="poll-photo-link" href="{% url 'polls:photo' poll.pk %}" target="_blank" rel="noopener" aria-label="Fotoğrafı büyük aç">
+      <img class="poll-photo" src="{% url 'polls:photo' poll.pk %}" alt="Anketin fotoğrafı: {{ poll.question }}" decoding="async">
+    </a>
+  {% endif %}
+
+  <h1 class="poll-detail__question">{{ poll.question }}</h1>
+  <p class="card__meta">
+    <span class="card__author">@{{ poll.author.username }}</span>
+    {% if author_badge %}<span class="badge badge--chip" title="{{ author_badge.name }}">{{ author_badge.emoji }} {{ author_badge.name }}</span>{% endif %}
+    <span>{{ poll.created_at|ago }}</span>
+    <span>{% if blind %}{{ total }} kişi oy verdi{% else %}{{ total }} oy{% endif %}</span>
+  </p>
+
+  {% if blind %}
+    {# Acil Karar still running: no percentages, no counts, no bars anywhere in this HTML. #}
+    {% if can_vote %}
+      <form method="post" action="{% url 'polls:vote' poll.pk %}">
+        {% csrf_token %}
+        <ul class="results results--choice">
+          {% for row in blind_rows %}
+            <li>
+              <label class="result result--choice result--blind">
+                <input class="result__input" type="radio" name="option" value="{{ row.option.pk }}" required>
+                <span class="result__label">{{ row.option.text }}</span>
+              </label>
+            </li>
+          {% endfor %}
+        </ul>
+        <button class="btn btn--primary btn--block" type="submit">Oyumu kullan</button>
+      </form>
+      <p class="poll-note">Sonuçlar süre dolunca açılır. Önce sen karar ver 🙈</p>
+    {% else %}
+      <ul class="option-list">
+        {% for row in blind_rows %}
+          <li class="option-item{% if row.is_mine %} option-item--mine{% endif %}">
+            <span>{{ row.option.text }}</span>
+            {% if row.is_mine %}<span class="result__check" role="img" aria-label="Senin seçimin">✓</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      {% if has_voted %}
+        <p class="poll-note">Oyunu kullandın! Sonuçlar süre dolunca burada açılacak ⏳</p>
+      {% else %}
+        <div class="login-prompt">
+          <p class="login-prompt__text">Oy vermek için giriş yapmalısın.</p>
+          <div class="login-prompt__actions">
+            <a class="btn btn--primary btn--sm" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}">Giriş yap</a>
+            <a class="btn btn--ghost btn--sm" href="{% url 'accounts:register' %}?next={{ request.path|urlencode }}">Kayıt ol</a>
+          </div>
+        </div>
+      {% endif %}
+    {% endif %}
+
+  {% elif can_vote %}
+    <form method="post" action="{% url 'polls:vote' poll.pk %}">
+      {% csrf_token %}
+      <ul class="results results--choice">
+        {% for row in rows %}
+          <li>
+            <label class="result result--choice{% if row.is_winner %} result--winner{% endif %}" style="--pct: {{ row.pct }}">
+              <input class="result__input" type="radio" name="option" value="{{ row.option.pk }}" required>
+              <span class="result__label">{{ row.option.text }}</span>
+              <span class="result__side"><span class="result__pct">{{ row.pct }}%</span><span class="result__count">{{ row.count }} oy</span></span>
+            </label>
+          </li>
+        {% endfor %}
+      </ul>
+      <button class="btn btn--primary btn--block" type="submit">Oyumu kullan</button>
+    </form>
+    {% include "polls/_insight.html" %}
+
+  {% else %}
+    <ul class="results">
+      {% for row in rows %}
+        <li class="result{% if row.is_winner %} result--winner{% endif %}{% if row.is_mine %} result--mine{% endif %}" style="--pct: {{ row.pct }}">
+          <span class="result__label">{{ row.option.text }}{% if row.is_mine %} <span class="result__check" role="img" aria-label="Senin seçimin">✓</span>{% endif %}</span>
+          <span class="result__side"><span class="result__pct">{{ row.pct }}%</span><span class="result__count">{{ row.count }} oy</span></span>
+        </li>
+      {% endfor %}
+    </ul>
+    {% include "polls/_insight.html" %}
+
+    {% if closed_urgent %}
+      {% if not has_voted %}<p class="poll-note">Süre doldu, oylama kapandı.</p>{% else %}<p class="poll-note">Oyunu kullandın, teşekkürler! 🙌</p>{% endif %}
+    {% elif has_voted %}
+      <p class="poll-note">Oyunu kullandın, teşekkürler! 🙌</p>
+    {% else %}
+      <div class="login-prompt">
+        <p class="login-prompt__text">Oy vermek için giriş yapmalısın.</p>
+        <div class="login-prompt__actions">
+          <a class="btn btn--primary btn--sm" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}">Giriş yap</a>
+          <a class="btn btn--ghost btn--sm" href="{% url 'accounts:register' %}?next={{ request.path|urlencode }}">Kayıt ol</a>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {% if total == 0 and not blind and not closed_urgent %}
+    <p class="poll-note">Henüz oy yok{% if can_vote %}, ilk oyu sen ver!{% else %}.{% endif %}</p>
+  {% endif %}
+
+  {% if is_owner %}
+    <form class="poll-detail__owner" method="post" action="{% url 'polls:delete' poll.pk %}"
+          data-confirm="Bu anketi ve tüm oylarını silmek istediğine emin misin? Bu işlem geri alınamaz.">
+      {% csrf_token %}
+      <button class="btn btn--danger btn--sm" type="submit">Anketi sil</button>
+    </form>
+  {% endif %}
+</article>
+{% endblock %}

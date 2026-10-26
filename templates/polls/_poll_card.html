@@ -1,0 +1,32 @@
+{% load polls_extras %}
+<article class="card poll-card">
+  {% if poll.has_image %}
+    <img class="poll-photo" src="{% url 'polls:photo' poll.pk %}" alt="Anketin fotoğrafı: {{ poll.question }}" loading="lazy" decoding="async">
+  {% endif %}
+  {% if poll.is_urgent %}
+    {% if poll.is_closed %}
+      <p class="chip chip--closed">🔒 Acil Karar · Kapandı</p>
+    {% else %}
+      <p class="chip chip--urgent">⏱ Acil Karar ·
+        <span data-countdown data-seconds-left="{{ poll.seconds_left }}" data-end-text="🔒 Kapandı">{{ poll.clock }}</span>
+      </p>
+    {% endif %}
+  {% endif %}
+  <h2 class="card__question"><a class="card__link" href="{% url 'polls:detail' poll.pk %}">{{ poll.question }}</a></h2>
+  <p class="card__meta">
+    <span class="card__author">@{{ poll.author.username }}{% if poll.author_badge %} <span class="badge" title="{{ poll.author_badge.name }}" aria-label="{{ poll.author_badge.name }}">{{ poll.author_badge.emoji }}</span>{% endif %}</span>
+    <span>{{ poll.created_at|ago }}</span>
+    <span>{{ poll.options.all|length }} seçenek</span>
+    <span>{{ poll.total_votes }} oy</span>
+  </p>
+  <ul class="pills">
+    {% for option in poll.options.all %}<li class="pill">{{ option.text }}</li>{% endfor %}
+  </ul>
+  {% if show_delete %}
+    <form class="poll-card__actions" method="post" action="{% url 'polls:delete' poll.pk %}"
+          data-confirm="Bu anketi ve tüm oylarını silmek istediğine emin misin? Bu işlem geri alınamaz.">
+      {% csrf_token %}
+      <button class="btn btn--danger btn--sm" type="submit">Sil</button>
+    </form>
+  {% endif %}
+</article>

@@ -1,0 +1,11 @@
+{% load static %}{% if insight %}
+<section class="insight" aria-label="Anket özeti">
+  <img class="insight__icon" src="{% static 'img/yorum.svg' %}" alt="" width="48" height="48">
+  <div class="insight__body">
+    <p class="insight__mood"><span class="insight__chip">{{ insight.emoji }} {{ insight.mood }}</span></p>
+    <p class="insight__text">{{ insight.text }}</p>
+    {% if insight.personal %}<p class="insight__personal">{{ insight.personal }}</p>{% endif %}
+    <p class="insight__basis">{{ insight.basis }}</p>
+  </div>
+</section>
+{% endif %}

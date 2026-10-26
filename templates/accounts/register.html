@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Kayıt ol · kararsızım{% endblock %}
+
+{% block fab %}{% endblock %}
+
+{% block content %}
+<section class="card auth">
+  <h1 class="auth__title">Hesap oluştur</h1>
+  <p class="auth__lead">Anket açmak ve oy vermek için üye ol. Birkaç saniye sürer.</p>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+
+    {% if form.non_field_errors %}
+      <div class="form-error" role="alert">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    {% include "accounts/_field.html" with field=form.username %}
+    {% include "accounts/_field.html" with field=form.email %}
+    {% include "accounts/_field.html" with field=form.password1 %}
+    {% include "accounts/_field.html" with field=form.password2 %}
+
+    <button class="btn btn--primary btn--block" type="submit">Hesap oluştur</button>
+  </form>
+
+  <p class="auth__switch">Zaten hesabın var mı? <a href="{% url 'accounts:login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Giriş yap</a></p>
+</section>
+{% endblock %}

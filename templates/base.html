@@ -1,0 +1,73 @@
+{% load static %}<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}kararsızım{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="logo" href="{% url 'polls:home' %}" aria-label="kararsızım ana sayfa">
+        <img class="logo__mark" src="{% static 'img/logo.svg' %}" alt="" width="36" height="36">
+        <span class="logo__text">kararsızım</span>
+      </a>
+      <nav class="topbar__nav" aria-label="Ana menü">
+        {% block nav %}
+          {% if user.is_authenticated %}
+            <a class="topbar__user" href="{% url 'polls:mine' %}" aria-label="Anketlerim (@{{ user.username }})">@{{ user.username }}</a>
+            <form method="post" action="{% url 'accounts:logout' %}">
+              {% csrf_token %}
+              <button class="btn btn--ghost btn--sm" type="submit">Çıkış</button>
+            </form>
+          {% else %}
+            <a class="btn btn--ghost btn--sm" href="{% url 'accounts:login' %}">Giriş</a>
+            <a class="btn btn--primary btn--sm" href="{% url 'accounts:register' %}">Kayıt ol</a>
+          {% endif %}
+        {% endblock %}
+      </nav>
+    </div>
+  </header>
+
+  {% if messages %}
+    <div class="toasts" role="status" aria-live="polite">
+      {% for message in messages %}
+        <div class="toast toast--{{ message.tags }}" data-toast{% if message.tags == "error" %} role="alert"{% endif %}>
+          <p class="toast__text">{{ message }}</p>
+          <button class="toast__close" type="button" data-toast-close aria-label="Kapat">×</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="layout">
+    <aside class="side side--left" aria-label="Yardım">
+      {% block side_left %}{% include "polls/_side_left.html" %}{% endblock %}
+    </aside>
+
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+
+    <aside class="side side--right" aria-label="Popüler anketler">
+      {% block side_right %}{% include "polls/_side_right.html" %}{% endblock %}
+    </aside>
+  </div>
+
+  {% block fab %}
+    <a class="fab" href="{% url 'polls:create' %}" aria-label="Anket aç"><span class="fab__plus" aria-hidden="true">+</span><span class="fab__label">Anket aç</span></a>
+  {% endblock %}
+
+  <script src="{% static 'js/confirm.js' %}" defer></script>
+  <script src="{% static 'js/countdown.js' %}" defer></script>
+  <script src="{% static 'js/toast.js' %}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

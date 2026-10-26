@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Anketlerim · kararsızım{% endblock %}
+
+{% block side_right %}
+  {% include "polls/_side_right.html" %}
+  {% include "polls/_badge_panel.html" %}
+{% endblock %}
+
+{% block content %}
+<section class="hero hero--small">
+  <h1 class="hero__title">Anketlerim</h1>
+  <p class="hero__lead">Açtığın anketler burada. İstersen silebilirsin.</p>
+</section>
+
+{# Narrow screens have no side panels: a one-line, expandable summary instead #}
+<details class="badge-compact">
+  <summary class="badge-compact__summary">
+    <span class="badge-compact__emoji" aria-hidden="true">{% if badge_profile.current %}{{ badge_profile.current.emoji }}{% else %}🎲{% endif %}</span>
+    <span class="badge-compact__name">{% if badge_profile.current %}{{ badge_profile.current.name }}{% else %}Henüz rozetin yok{% endif %}</span>
+    <span class="badge-compact__more">Rozetim</span>
+  </summary>
+  {% include "polls/_badge_card.html" %}
+</details>
+
+{% if page_obj.object_list %}
+  <div class="feed">
+    {% for poll in page_obj %}
+      {% include "polls/_poll_card.html" with show_delete=True %}
+    {% endfor %}
+  </div>
+  {% include "polls/_pagination.html" %}
+{% else %}
+  <section class="empty">
+    <p class="empty__text">Henüz anket açmadın 🤔</p>
+    <p class="empty__sub">İlk kararsızlığını paylaş, millet karar versin.</p>
+  </section>
+{% endif %}
+{% endblock %}

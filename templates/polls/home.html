@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <h1 class="hero__title">Kararsız mısın? Sor, millet karar versin.</h1>
+  <p class="hero__lead">Soruyu yaz, 2 ile 5 seçenek ekle, oylar gelsin.</p>
+</section>
+
+{% if page_obj.object_list %}
+  <div class="feed">
+    {% for poll in page_obj %}
+      {% include "polls/_poll_card.html" %}
+    {% endfor %}
+  </div>
+
+  {% include "polls/_pagination.html" %}
+{% else %}
+  <section class="empty">
+    <p class="empty__text">Henüz kimse kararsız kalmamış 😄</p>
+    <p class="empty__sub">İlk anketi sen aç!</p>
+  </section>
+{% endif %}
+{% endblock %}

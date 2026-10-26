@@ -1,0 +1,17 @@
+<section class="panel">
+  <h2 class="panel__title">Popüler anketler</h2>
+  {% if popular %}
+    <ol class="popular">
+      {% for poll in popular %}
+        <li>
+          <a class="popular__link" href="{% url 'polls:detail' poll.pk %}">
+            <span class="popular__question">{{ poll.question }}</span>
+            <span class="popular__votes">{{ poll.total_votes }} oy</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p class="panel__empty">Henüz oy verilmiş anket yok. İlk oyu sen ver!</p>
+  {% endif %}
+</section>

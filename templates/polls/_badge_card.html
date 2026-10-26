@@ -1,0 +1,29 @@
+<div class="badge-card__body">
+  <div class="badge-card__top">
+    <span class="badge-card__emoji" aria-hidden="true">{% if badge_profile.current %}{{ badge_profile.current.emoji }}{% else %}🎲{% endif %}</span>
+    <div>
+      <h3 class="badge-card__title">{% if badge_profile.current %}{{ badge_profile.current.name }}{% else %}Henüz rozetin yok{% endif %}</h3>
+      <p class="badge-card__sub">
+        {% if badge_profile.total %}
+          {{ badge_profile.total }} Acil Karar'dan {{ badge_profile.hits }} tanesinde topluluğla aynı tarafta oy verdin (%{{ badge_profile.rate }}).
+        {% else %}
+          Acil Karar anketlerine oy ver; süre dolup sonuç kesinleşince rozetin yolda!
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  {% if badge_profile.next %}
+    <p class="badge-card__next">Sıradaki: <strong>{{ badge_profile.next.emoji }} {{ badge_profile.next.name }}</strong>
+      — en az {{ badge_profile.next.min_votes }} oy{% if badge_profile.next_rate_percent %} ve %{{ badge_profile.next_rate_percent }} uyum{% endif %}</p>
+  {% endif %}
+
+  <ul class="badge-tiers">
+    {% for tier in badge_profile.tiers %}
+      <li class="badge-tier{% if badge_profile.current and tier.key == badge_profile.current.key %} badge-tier--now{% endif %}">
+        <span aria-hidden="true">{{ tier.emoji }}</span> {{ tier.name }}
+      </li>
+    {% endfor %}
+  </ul>
+  <p class="badge-card__note">Sadece süresi dolmuş, en az 5 oy almış ve net bir kazananı olan Acil Karar anketleri sayılır. Kendi anketine verdiğin oy sayılmaz.</p>
+</div>

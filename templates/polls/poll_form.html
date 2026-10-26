@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Anket aç · kararsızım{% endblock %}
+{% block fab %}{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'polls:home' %}">← Vazgeç</a>
+
+<section class="card auth">
+  <h1 class="auth__title">Anket aç</h1>
+  <p class="auth__lead">Sorunu yaz, {{ min_options }} ile {{ max_options }} arasında seçenek ekle.</p>
+
+  <form method="post" enctype="multipart/form-data" novalidate data-poll-form data-min="{{ min_options }}" data-max="{{ max_options }}" data-photo-max="3145728">
+    {% csrf_token %}
+
+    <div class="field{% if form.question.errors %} field--error{% endif %}">
+      <label class="field__label" for="{{ form.question.id_for_label }}">{{ form.question.label }}</label>
+      {{ form.question }}
+      <p class="field__counter" aria-hidden="true"><span data-counter="{{ form.question.id_for_label }}">0</span>/{{ question_max }}</p>
+      {% for error in form.question.errors %}<p class="field__error" role="alert">{{ error }}</p>{% endfor %}
+    </div>
+
+    <div class="field{% if form.image.errors %} field--error{% endif %}">
+      <label class="field__label" for="{{ form.image.id_for_label }}">Fotoğraf <span class="field__optional">(isteğe bağlı)</span></label>
+      {{ form.image }}
+      <img class="photo-preview" data-photo-preview alt="Seçtiğin fotoğrafın önizlemesi" hidden>
+      <button class="btn btn--ghost btn--sm photo-remove" type="button" data-photo-remove hidden>Fotoğrafı kaldır</button>
+      <p class="field__help">JPG, PNG veya WebP, en fazla 3 MB. Konum bilgisi silinir. Uygunsuz içerik yasaktır.</p>
+      <p class="field__error" data-photo-error role="alert"></p>
+      {% if form.had_upload and form.errors %}<p class="field__help">Bir hata olduğu için fotoğrafı yeniden seçmen gerekiyor.</p>{% endif %}
+      {% for error in form.image.errors %}<p class="field__error" role="alert">{{ error }}</p>{% endfor %}
+    </div>
+
+    <fieldset class="options">
+      <legend class="field__label">Seçenekler</legend>
+
+      {% if form.non_field_errors %}
+        <div class="form-error" role="alert">
+          {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+
+      <div data-option-list>
+        {% for value in form.option_values %}
+          <div class="option-row" data-option-row>
+            <input class="field__input" type="text" name="option" value="{{ value }}"
+                   maxlength="{{ option_max }}" placeholder="Seçenek {{ forloop.counter }}"
+                   aria-label="Seçenek {{ forloop.counter }}" autocomplete="off">
+            <button class="option-row__remove" type="button" data-remove-option aria-label="Seçeneği sil">×</button>
+          </div>
+        {% endfor %}
+      </div>
+
+      <template data-option-template>
+        <div class="option-row" data-option-row>
+          <input class="field__input" type="text" name="option" value=""
+                 maxlength="{{ option_max }}" autocomplete="off">
+          <button class="option-row__remove" type="button" data-remove-option aria-label="Seçeneği sil">×</button>
+        </div>
+      </template>
+
+      <button class="btn btn--ghost btn--sm" type="button" data-add-option>+ Seçenek ekle</button>
+      <p class="field__help" data-max-hint hidden>En fazla {{ max_options }} seçenek ekleyebilirsin.</p>
+    </fieldset>
+
+    <label class="check" for="{{ form.urgent.id_for_label }}">
+      {{ form.urgent }}
+      <span class="check__text">
+        <strong>⏱ Acil Karar yap</strong>
+        <span class="check__help">{{ urgent_minutes }} dakika sonra oylama kapanır ve sonuç kilitlenir. Süre dolana kadar kimse sonucu göremez.</span>
+      </span>
+    </label>
+
+    <button class="btn btn--primary btn--block" type="submit">Anketi yayınla</button>
+  </form>
+</section>
+{% endblock %}
+
+{% block scripts %}<script src="{% static 'js/poll_form.js' %}" defer></script>{% endblock %}
