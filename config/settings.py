@@ -78,11 +78,12 @@ if not DATABASE_URL:
     )
 
 _is_postgres = DATABASE_URL.startswith(("postgres://", "postgresql://"))
+import dj_database_url
+
 DATABASES = {
-    "default": dj_database_url.parse(
-        DATABASE_URL,
-        conn_max_age=0,  # serverless + pooler: do not keep connections open
-        ssl_require=_is_postgres,
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600
     )
 }
 if _is_postgres:
