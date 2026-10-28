@@ -31,7 +31,7 @@ if not SECRET_KEY:
     else:
         raise ImproperlyConfigured("SECRET_KEY ortam değişkeni tanımlı değil.")
 
-ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1")
+ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
 
 INSTALLED_APPS = [
