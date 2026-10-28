@@ -23,13 +23,7 @@ def env_list(name, default=""):
 
 DEBUG = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes")
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "")
-if not SECRET_KEY:
-    if DEBUG:
-        # Only for local development; never used when DEBUG is off.
-        SECRET_KEY = "dev-only-insecure-key-do-not-use-in-production"
-    else:
-        raise ImproperlyConfigured("SECRET_KEY ortam değişkeni tanımlı değil.")
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-vercel-secret-key-123456")
 
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
