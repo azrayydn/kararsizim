@@ -21,7 +21,7 @@ def env_list(name, default=""):
     return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
 
 
-DEBUG = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes")
+DEBUG = os.environ.get("DEBUG", "True").lower() in ("1", "true", "yes")
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-vercel-secret-key-123456")
 
